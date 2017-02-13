@@ -6,6 +6,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+
+import dalvik.system.DexClassLoader;
 import de.robv.android.xposed.IXposedHookInitPackageResources;
 import de.robv.android.xposed.IXposedHookLoadPackage;
 import de.robv.android.xposed.IXposedHookZygoteInit;
@@ -35,7 +41,7 @@ public class Module implements IXposedHookZygoteInit, IXposedHookInitPackageReso
         XposedHelpers.findAndHookMethod(Application.class, "onCreate", new XC_MethodHook() {
             @Override
             protected void afterHookedMethod(MethodHookParam param) throws Throwable {
-                Application currentApp = (Application) param.thisObject;
+                final Application currentApp = (Application) param.thisObject;
                 XposedBridge.log(TAG + "/Hooked package: " + lpparam.packageName + ", application: " + currentApp);
 
                 if (currentApp == null) return;
@@ -45,16 +51,38 @@ public class Module implements IXposedHookZygoteInit, IXposedHookInitPackageReso
                     public void onReceive(Context context, Intent intent) {
                         String className = intent.getStringExtra("className");
                         String methodName = intent.getStringExtra("methodName");
+                        String hookImplName = intent.getStringExtra("hookImpl");
+                        byte[] hookDexFileBytes = intent.getByteArrayExtra("hookDexFile");
+
                         XposedBridge.log(TAG + "/Hooking method: " + className + "#" + methodName);
 
                         try {
-                            XposedHelpers.findAndHookMethod(className, lpparam.classLoader, methodName, new DefaultMethodHook());
+                            File dexDir = currentApp.getCodeCacheDir();
+                            File dexFile = saveFile(hookDexFileBytes, currentApp.getCacheDir(), "classes.dex");
+                            DexClassLoader dcl = new DexClassLoader(
+                                    dexFile.getAbsolutePath(),
+                                    dexDir.getAbsolutePath(),
+                                    null,
+                                    ClassLoader.getSystemClassLoader());
+                            Class<XC_MethodHook> hookImplClass = (Class<XC_MethodHook>) dcl.loadClass(hookImplName);
+                            XC_MethodHook hookImpl = hookImplClass.newInstance();
+                            XposedHelpers.findAndHookMethod(className, lpparam.classLoader, methodName, hookImpl);
                         } catch (Exception e) {
-                            XposedBridge.log(TAG + "/Couldn't hook method");
+                            XposedBridge.log(e);
                         }
                     }
                 }, new IntentFilter(BuildConfig.APPLICATION_ID + ".hookMethod"));
             }
         });
+    }
+
+    private File saveFile(byte[] dexFileBytes, File dir, String fileName) throws IOException {
+        File dexFile = new File(dir, fileName);
+        dexFile.createNewFile();
+        try (BufferedOutputStream dexWriter = new BufferedOutputStream(new FileOutputStream(dexFile))) {
+            dexWriter.write(dexFileBytes);
+            dexWriter.close();
+        }
+        return dexFile;
     }
 }
