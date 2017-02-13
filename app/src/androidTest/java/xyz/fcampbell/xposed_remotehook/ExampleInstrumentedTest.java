@@ -1,4 +1,4 @@
-package xyz.fcampbell.xposed_template;
+package xyz.fcampbell.xposed_remotehook;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
@@ -21,6 +21,6 @@ public class ExampleInstrumentedTest {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getTargetContext();
 
-        assertEquals("xyz.fcampbell.xposed_template", appContext.getPackageName());
+        assertEquals("xyz.fcampbell.xposed_remotehook", appContext.getPackageName());
     }
 }

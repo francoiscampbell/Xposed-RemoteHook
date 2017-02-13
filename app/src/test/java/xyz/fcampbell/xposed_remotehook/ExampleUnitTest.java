@@ -1,4 +1,4 @@
-package xyz.fcampbell.xposed_template;
+package xyz.fcampbell.xposed_remotehook;
 
 import org.junit.Test;
 
