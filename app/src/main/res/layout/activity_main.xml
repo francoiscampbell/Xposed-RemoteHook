@@ -19,6 +19,12 @@
         android:text="Hook testMethod()"/>
 
     <Button
+        android:id="@+id/unhookTestMethod"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Unhook testMethod()"/>
+
+    <Button
         android:id="@+id/callTestMethod"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
