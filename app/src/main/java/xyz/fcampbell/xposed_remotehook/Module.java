@@ -6,17 +6,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import dalvik.system.DexClassLoader;
 import de.robv.android.xposed.IXposedHookInitPackageResources;
 import de.robv.android.xposed.IXposedHookLoadPackage;
 import de.robv.android.xposed.IXposedHookZygoteInit;
@@ -79,7 +74,7 @@ public class Module implements IXposedHookZygoteInit, IXposedHookInitPackageReso
     }
 
     private void hookMethod(Context context, Intent intent, ClassLoader classLoader) {
-        if (!validateIntentExtras(intent)) {
+        if (!validateIntentExtrasForHooking(intent)) {
             XposedBridge.log(TAG + "/Couldn't hook method, intent did't have the required extras");
             return;
         }
@@ -126,29 +121,15 @@ public class Module implements IXposedHookZygoteInit, IXposedHookInitPackageReso
 
     private XC_MethodHook makeHookImpl(Context context, byte[] hookDexFileBytes, String hookImplName) {
         try {
-            File dexDir = context.getCodeCacheDir();
-            File dexFile = saveFile(hookDexFileBytes, context.getCacheDir(), hookImplName + ".classes.dex");
-
-            DexClassLoader dcl = new DexClassLoader(
-                    dexFile.getAbsolutePath(),
-                    dexDir.getAbsolutePath(),
-                    null,
+            ByteArrayDexClassLoader classLoader = new ByteArrayDexClassLoader(
+                    hookDexFileBytes,
+                    hookImplName + ".classes.dex",
+                    context,
                     ClassLoader.getSystemClassLoader());
-            Class<?> hookClass = dcl.loadClass(hookImplName);
-            return (XC_MethodHook) hookClass.newInstance();
+            return classLoader.<XC_MethodHook>loadClass(hookImplName).newInstance();
         } catch (Exception e) {
             return null;
         }
-    }
-
-    private File saveFile(byte[] dexFileBytes, File dir, String fileName) throws IOException {
-        File dexFile = new File(dir, fileName);
-        dexFile.createNewFile();
-        try (BufferedOutputStream dexWriter = new BufferedOutputStream(new FileOutputStream(dexFile))) {
-            dexWriter.write(dexFileBytes);
-            dexWriter.close();
-        }
-        return dexFile;
     }
 
     private boolean validateIntentExtras(Intent intent) {
