@@ -58,7 +58,7 @@ public class Module implements IXposedHookZygoteInit, IXposedHookInitPackageReso
                 currentApp.registerReceiver(new BroadcastReceiver() {
                     @Override
                     public void onReceive(Context context, Intent intent) {
-                        hookMethod(intent, context);
+                        hookMethod(context, intent);
                     }
                 }, new IntentFilter(ACTION_HOOK));
 
@@ -72,7 +72,7 @@ public class Module implements IXposedHookZygoteInit, IXposedHookInitPackageReso
         });
     }
 
-    private void hookMethod(Intent intent, Context context) {
+    private void hookMethod(Context context, Intent intent) {
         try {
             XC_MethodHook hookImpl = makeHookImpl(context, intent);
             MethodHook.Method m = makeMethod(intent);
