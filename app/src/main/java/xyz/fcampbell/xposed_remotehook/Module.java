@@ -5,7 +5,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.os.Bundle;
 
 import java.io.IOException;
 
@@ -17,6 +16,8 @@ import de.robv.android.xposed.XposedBridge;
 import de.robv.android.xposed.XposedHelpers;
 import de.robv.android.xposed.callbacks.XC_InitPackageResources;
 import de.robv.android.xposed.callbacks.XC_LoadPackage;
+import xyz.fcampbell.xposed_remotehook.app.MethodHook;
+import xyz.fcampbell.xposed_remotehook.classloader.ByteArrayDexClassLoader;
 
 /**
  * Main Xposed module
@@ -24,14 +25,12 @@ import de.robv.android.xposed.callbacks.XC_LoadPackage;
 public class Module implements IXposedHookZygoteInit, IXposedHookInitPackageResources, IXposedHookLoadPackage {
     private static final String TAG = "Module";
 
-    static final String ACTION_HOOK = BuildConfig.APPLICATION_ID + ".hook";
-    static final String ACTION_UNHOOK = BuildConfig.APPLICATION_ID + ".unhook";
+    public static final String ACTION_HOOK = BuildConfig.APPLICATION_ID + ".hook";
+    public static final String ACTION_UNHOOK = BuildConfig.APPLICATION_ID + ".unhook";
 
-    static final String CLASS_NAME = "className";
-    static final String METHOD_NAME = "methodName";
-    static final String PARAM_TYPES = "paramTypes";
-    static final String HOOK_IMPL_CLASS_NAME = "hookImplClassName";
-    static final String HOOK_IMPL_DEX_FILE = "hookImplDexFile";
+    public static final String METHOD = "method";
+    public static final String HOOK_IMPL_CLASS_NAME = "hookImplClassName";
+    public static final String HOOK_IMPL_DEX_FILE = "hookImplDexFile";
 
     private MethodHook mh;
 
@@ -75,8 +74,8 @@ public class Module implements IXposedHookZygoteInit, IXposedHookInitPackageReso
     private void hookMethod(Context context, Intent intent) {
         try {
             XC_MethodHook hookImpl = makeHookImpl(context, intent);
-            MethodHook.Method m = makeMethod(intent);
-            XposedBridge.log(TAG + "/Hooking method: " + m.getClassName() + "#" + m.getMethodName());
+            MethodHook.Method m = getMethod(intent);
+            XposedBridge.log(TAG + "/Hooking method: " + m.className() + "#" + m.methodName());
             mh.hook(m, hookImpl);
         } catch (Exception e) {
             XposedBridge.log(e);
@@ -85,8 +84,8 @@ public class Module implements IXposedHookZygoteInit, IXposedHookInitPackageReso
 
     private void unhookMethod(Intent intent) {
         try {
-            MethodHook.Method m = makeMethod(intent);
-            XposedBridge.log(TAG + "/Unhooking method: " + m.getClassName() + "#" + m.getMethodName());
+            MethodHook.Method m = getMethod(intent);
+            XposedBridge.log(TAG + "/Unhooking method: " + m.className() + "#" + m.methodName() + m.paramTypes().toString());
             mh.unhook(m);
         } catch (IllegalArgumentException e) {
             XposedBridge.log(e);
@@ -113,17 +112,7 @@ public class Module implements IXposedHookZygoteInit, IXposedHookInitPackageReso
                 && intent.hasExtra(HOOK_IMPL_DEX_FILE);
     }
 
-    private MethodHook.Method makeMethod(Intent intent) {
-        Bundle extras = intent.getExtras();
-
-        String className = extras.getString(CLASS_NAME);
-        if (className == null) {
-            throw new IllegalArgumentException("Intent extras did not contain " + CLASS_NAME);
-        }
-
-        String methodName = extras.getString(METHOD_NAME, "");
-        String[] paramTypes = extras.containsKey(PARAM_TYPES) ? extras.getStringArray(PARAM_TYPES) : new String[0];
-
-        return new MethodHook.Method(className, methodName, paramTypes);
+    private MethodHook.Method getMethod(Intent intent) {
+        return intent.getParcelableExtra(Module.METHOD);
     }
 }

@@ -10,24 +10,53 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context="xyz.fcampbell.xposed_remotehook.MainActivity">
+    tools:context="xyz.fcampbell.xposed_remotehook.app.MainActivity">
+
+    <EditText
+        android:id="@+id/hookedPackage"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Package name"/>
+
+    <EditText
+        android:id="@+id/hookedClassName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Class name"/>
+
+    <EditText
+        android:id="@+id/hookedMethodName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Method name"/>
+
+    <EditText
+        android:id="@+id/hookedMethodParams"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Method param class names (comma-separated)"/>
+
+    <EditText
+        android:id="@+id/hookImplClass"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Hook impl class name"/>
 
     <Button
-        android:id="@+id/hookTestMethod"
-        android:layout_width="wrap_content"
+        android:id="@+id/hook"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Hook testMethod()"/>
+        android:text="Hook"/>
+
+    <Spinner
+        android:id="@+id/hookedMethods"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
 
     <Button
-        android:id="@+id/unhookTestMethod"
-        android:layout_width="wrap_content"
+        android:id="@+id/unhook"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Unhook testMethod()"/>
-
-    <Button
-        android:id="@+id/callTestMethod"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Call testMethod()"/>
+        android:text="Unhook"/>
 
 </LinearLayout>

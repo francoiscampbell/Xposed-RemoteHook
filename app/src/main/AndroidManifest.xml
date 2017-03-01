@@ -20,7 +20,7 @@
             android:name="xposedminversion"
             android:value="30"/>
 
-        <activity android:name=".MainActivity">
+        <activity android:name=".app.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 

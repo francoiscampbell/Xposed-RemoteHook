@@ -34,9 +34,19 @@ task getClassesForDebug(type: Copy, dependsOn: ':hooks:transformClassesWithDexFo
 }
 preBuild.dependsOn getClassesForDebug
 
+repositories {
+    maven {url "https://clojars.org/repo/"}
+}
+
 dependencies {
     provided 'de.robv.android.xposed:api:82'
-    compile 'com.android.support:appcompat-v7:25.1.1' //for UI
+    provided 'com.ryanharter.auto.value:auto-value-parcel:0.2.5'
+
+    compile 'com.android.support:appcompat-v7:25.2.0' //for UI
+    compile 'com.jakewharton:butterknife:8.5.1'
+
+    annotationProcessor 'com.jakewharton:butterknife-compiler:8.5.1'
+    annotationProcessor 'com.ryanharter.auto.value:auto-value-parcel:0.2.5'
 
     testCompile 'junit:junit:4.12'
 

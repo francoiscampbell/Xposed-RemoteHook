@@ -1,4 +1,4 @@
-package xyz.fcampbell.xposed_remotehook;
+package xyz.fcampbell.xposed_remotehook.classloader;
 
 import android.content.Context;
 
