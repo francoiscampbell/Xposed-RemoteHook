@@ -31,7 +31,6 @@ public class Module implements IXposedHookZygoteInit, IXposedHookInitPackageReso
 
     @Override
     public void initZygote(StartupParam startupParam) throws Throwable {
-
     }
 
     @Override
@@ -89,7 +88,7 @@ public class Module implements IXposedHookZygoteInit, IXposedHookInitPackageReso
 
     private XC_MethodHook makeHookImpl(Context context, Intent intent) throws IOException, ClassNotFoundException, IllegalAccessException, InstantiationException, PackageManager.NameNotFoundException {
         if (!extrasContainDexFile(intent)) {
-            throw new IllegalArgumentException("Intent extras do not contain " + RemoteHook.HOOK_IMPL_DEX_FILE + " and/or " + RemoteHook.HOOK_IMPL_CLASS_NAME);
+            throw new IllegalArgumentException("Intent extras do not contain a reference to a dex file");
         }
 
         String sourcePackageName = intent.getStringExtra(RemoteHook.SOURCE_PACKAGE);
