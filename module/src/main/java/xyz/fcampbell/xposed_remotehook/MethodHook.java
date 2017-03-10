@@ -22,8 +22,6 @@ class MethodHook {
     }
 
     void hook(Method method, XC_MethodHook hookImpl) {
-        if (hookedMethods.containsKey(method)) return;
-
         Object[] paramTypesAndHookImpl = append(method.paramTypes().toArray(), hookImpl);
         XposedBridge.log(Arrays.deepToString(method.paramTypes().toArray()));
         XposedBridge.log(hookImpl.toString());
@@ -31,9 +29,16 @@ class MethodHook {
 
         XC_MethodHook.Unhook unhook;
         if (method.isConstructor()) {
-            unhook = XposedHelpers.findAndHookConstructor(method.className(), classLoader, paramTypesAndHookImpl);
+            unhook = XposedHelpers.findAndHookConstructor(
+                    method.className(),
+                    classLoader,
+                    paramTypesAndHookImpl);
         } else {
-            unhook = XposedHelpers.findAndHookMethod(method.className(), classLoader, method.methodName(), paramTypesAndHookImpl);
+            unhook = XposedHelpers.findAndHookMethod(
+                    method.className(),
+                    classLoader,
+                    method.methodName(),
+                    paramTypesAndHookImpl);
         }
 
         hookedMethods.put(method, unhook);
