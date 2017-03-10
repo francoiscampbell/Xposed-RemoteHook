@@ -1,1 +1,1 @@
-include ':app', ':hooks'
+include ':module', ':testapp', ':hooks', ':iface'

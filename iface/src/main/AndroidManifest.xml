@@ -1,0 +1,5 @@
+<manifest package="xyz.fcampbell.xposed_remotehook.iface">
+
+    <application/>
+
+</manifest>
