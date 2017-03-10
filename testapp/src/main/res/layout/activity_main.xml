@@ -50,7 +50,7 @@
         android:id="@+id/hook"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Hook"/>
+        android:text="@string/hook"/>
 
     <Spinner
         android:id="@+id/hookedMethods"
@@ -61,6 +61,12 @@
         android:id="@+id/unhook"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Unhook"/>
+        android:text="@string/unhook"/>
+
+    <Button
+        android:id="@+id/replaceRes"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Replace Resource"/>
 
 </LinearLayout>

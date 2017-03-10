@@ -18,6 +18,7 @@ public class RemoteHook {
 
     static final String ACTION_HOOK = BuildConfig.APPLICATION_ID + ".hook";
     static final String ACTION_UNHOOK = BuildConfig.APPLICATION_ID + ".unhook";
+    static final String ACTION_REPLACE_RES = BuildConfig.APPLICATION_ID + ".replaceRes";
     static final String SOURCE_PACKAGE = "sourcePackage";
     static final String HOOK_IMPL_RES_ID = "resId";
     static final String METHOD = "method";
@@ -59,5 +60,11 @@ public class RemoteHook {
         context.sendBroadcast(new Intent(ACTION_UNHOOK)
                 .putExtra(METHOD, method)
                 .setPackage(method.packageName()));
+    }
+
+    public static void replaceResourceTest(Context context) {
+        Log.d(TAG, "replacing resource using context: " + context.getApplicationContext());
+        context.sendBroadcast(new Intent(ACTION_REPLACE_RES)
+                .setPackage(context.getPackageName()));
     }
 }

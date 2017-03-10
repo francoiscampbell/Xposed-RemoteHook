@@ -81,4 +81,9 @@ public class MainActivity extends AppCompatActivity {
         hookedMethods.remove(m);
         hookedMethodsAdapter.notifyDataSetChanged();
     }
+
+    @OnClick(R.id.replaceRes)
+    void replaceRes() {
+        RemoteHook.replaceResourceTest(this);
+    }
 }
