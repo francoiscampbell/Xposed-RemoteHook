@@ -1,8 +1,7 @@
 package xyz.fcampbell.xposed_remotehook;
 
 import android.app.Application;
-import android.content.ComponentName;
-import android.content.pm.PackageManager;
+import android.content.Context;
 
 import de.robv.android.xposed.IXposedHookLoadPackage;
 import de.robv.android.xposed.XC_MethodHook;
@@ -25,16 +24,27 @@ public class Module implements IXposedHookLoadPackage {
     @Override
     public void handleLoadPackage(final XC_LoadPackage.LoadPackageParam lpparam) throws Throwable {
         packageClassLoader = lpparam.classLoader;
+        final RemoteHook[] remoteHook = new RemoteHook[1]; //to get around final variables in callbacks
 
         XposedHelpers.findAndHookMethod(Application.class, "onCreate", new XC_MethodHook() {
             @Override
             protected void afterHookedMethod(MethodHookParam param) throws Throwable {
                 Application currentApp = (Application) param.thisObject;
-                currentApp.getPackageManager().setComponentEnabledSetting(
-                        new ComponentName(currentApp, RemoteHookService.class),
-                        PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
-                        PackageManager.DONT_KILL_APP);
                 XposedBridge.log(TAG + "/Hooked package: " + lpparam.packageName + ", application: " + currentApp);
+            }
+        });
+
+        XposedHelpers.findAndHookMethod("android.app.ContextImpl", lpparam.classLoader, "getSystemService", String.class, new XC_MethodHook() {
+            @Override
+            protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+                if ("test".equals(param.args[0])) {
+                    XposedBridge.log(TAG + "/Retrieving RemoteHook in app: " + lpparam.packageName);
+
+                    if (remoteHook[0] == null) {
+                        remoteHook[0] = new RemoteHook((Context) param.thisObject);
+                    }
+                    param.setResult(IRemoteHook.Stub.asInterface(remoteHook[0]));
+                }
             }
         });
     }

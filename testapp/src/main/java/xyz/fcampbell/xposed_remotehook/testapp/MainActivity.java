@@ -50,31 +50,20 @@ public class MainActivity extends AppCompatActivity {
 
     @OnClick(R.id.hook)
     void hook() {
-        ComponentName componentName = new ComponentName(hookedPackage.getText().toString(), "xyz.fcampbell.xposed_remotehook.RemoteHookService");
-        Intent intent = new Intent().setComponent(componentName);
-        bindService(intent, new ServiceConnection() {
-            @Override
-            public void onServiceConnected(ComponentName name, IBinder service) {
-                try {
-                    IRemoteHook remoteHook = IRemoteHook.Stub.asInterface(service);
-                    String paramsListString = hookedMethodParams.getText().toString();
-                    String[] paramsList = paramsListString.isEmpty() ? new String[0] : paramsListString.split(",");
-                    remoteHook.hookMethod(
-                            hookedClassName.getText().toString(),
-                            hookedMethodName.getText().toString(),
-                            paramsList,
-                            hookImplClass.getText().toString(),
-                            dexToBytes(MainActivity.this, R.raw.classes));
-                } catch (IOException | RemoteException e) {
-                    Log.e(TAG, "Exception when hooking method", e);
-                }
-            }
-
-            @Override
-            public void onServiceDisconnected(ComponentName name) {
-
-            }
-        }, Context.BIND_AUTO_CREATE);
+        try {
+            IBinder remoteHook = (IBinder) getSystemService("test");
+            IRemoteHook rh = IRemoteHook.Stub.asInterface(remoteHook);
+            String paramsListString = hookedMethodParams.getText().toString();
+            String[] paramsList = paramsListString.isEmpty() ? new String[0] : paramsListString.split(",");
+            rh.hookMethod(
+                    hookedClassName.getText().toString(),
+                    hookedMethodName.getText().toString(),
+                    paramsList,
+                    hookImplClass.getText().toString(),
+                    dexToBytes(MainActivity.this, R.raw.classes));
+        } catch (IOException | RemoteException e) {
+            Log.e(TAG, "Exception when hooking method", e);
+        }
     }
 
     @OnClick(R.id.unhook)

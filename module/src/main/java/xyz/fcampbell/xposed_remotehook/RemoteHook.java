@@ -16,7 +16,7 @@ import de.robv.android.xposed.XposedHelpers;
  */
 class RemoteHook extends IRemoteHook.Stub {
     private Context context;
-    private static Map<Member, XC_MethodHook.Unhook> hookedMethods = new HashMap<>();
+    private Map<Member, XC_MethodHook.Unhook> hookedMethods = new HashMap<>();
 
     public RemoteHook(Context context) {
         this.context = context;
