@@ -22,7 +22,6 @@ public class RemoteHook {
     static final String HOOK_IMPL_RES_ID = "resId";
     static final String METHOD = "method";
     static final String HOOK_IMPL_CLASS_NAME = "hookImplClassName";
-    static final String HOOK_IMPL_DEX_FILE = "hookImplDexFile";
 
     /**
      * TODO This method lives in the local module
