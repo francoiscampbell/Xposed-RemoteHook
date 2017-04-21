@@ -18,10 +18,19 @@ public class RemoteHook {
 
     static final String ACTION_HOOK = BuildConfig.APPLICATION_ID + ".hook";
     static final String ACTION_UNHOOK = BuildConfig.APPLICATION_ID + ".unhook";
-    static final String SOURCE_PACKAGE = "sourcePackage";
-    static final String HOOK_IMPL_RES_ID = "resId";
-    static final String METHOD = "method";
-    static final String HOOK_IMPL_CLASS_NAME = "hookImplClassName";
+
+    static final String KEY_METHOD = "method";
+
+    static final String KEY_CLASS_NAME = "className";
+    static final String KEY_METHOD_NAME = "methodName";
+    static final String KEY_PARAM_TYPES = "paramTypes";
+
+    static final String KEY_SOURCE_PACKAGE = "sourcePackage";
+    static final String KEY_HOOK_IMPL_RES_ID = "hookImplResId";
+
+    static final String KEY_HOOK_IMPL_CLASS_NAME = "hookImplClassName";
+    static final String KEY_HOOK_IMPL_DEX_FILE_BYTES = "hookImplDexFile";
+    static final String KEY_HOOK_IMPL_DEX_FILE_PATH = "hookImplDexFilePath";
 
     /**
      * TODO This method lives in the local module
@@ -33,16 +42,17 @@ public class RemoteHook {
      * @return
      */
     public static void hookMethod(Context context,
+                                  String packageName,
                                   Method method,
                                   String hookImplClassName,
                                   @RawRes int hookImplDexFileRes) throws IOException {
         Log.d(TAG, "Sending broadcast using context: " + context.getApplicationContext());
         context.sendBroadcast(new Intent(ACTION_HOOK)
-                .putExtra(SOURCE_PACKAGE, context.getPackageName())
-                .putExtra(METHOD, method)
-                .putExtra(HOOK_IMPL_CLASS_NAME, hookImplClassName)
-                .putExtra(HOOK_IMPL_RES_ID, hookImplDexFileRes)
-                .setPackage(method.packageName()));
+                .putExtra(KEY_SOURCE_PACKAGE, context.getPackageName())
+                .putExtra(KEY_METHOD, method)
+                .putExtra(KEY_HOOK_IMPL_CLASS_NAME, hookImplClassName)
+                .putExtra(KEY_HOOK_IMPL_RES_ID, hookImplDexFileRes)
+                .setPackage(packageName));
     }
 
     /**
@@ -53,10 +63,11 @@ public class RemoteHook {
      * @return
      */
     public static void unhookMethod(Context context,
+                                    String packageName,
                                     Method method) {
         Log.d(TAG, "Sending broadcast using context: " + context.getApplicationContext());
         context.sendBroadcast(new Intent(ACTION_UNHOOK)
-                .putExtra(METHOD, method)
-                .setPackage(method.packageName()));
+                .putExtra(KEY_METHOD, method)
+                .setPackage(packageName));
     }
 }

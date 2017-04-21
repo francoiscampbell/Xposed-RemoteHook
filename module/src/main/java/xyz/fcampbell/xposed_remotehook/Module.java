@@ -5,11 +5,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.PackageManager;
-import android.content.res.Resources;
-
-import java.io.IOException;
-import java.io.InputStream;
 
 import de.robv.android.xposed.IXposedHookInitPackageResources;
 import de.robv.android.xposed.IXposedHookLoadPackage;
@@ -27,6 +22,7 @@ import de.robv.android.xposed.callbacks.XC_LoadPackage;
 public class Module implements IXposedHookZygoteInit, IXposedHookInitPackageResources, IXposedHookLoadPackage {
     private static final String TAG = "Module";
 
+    private HookFactory hookFactory;
     private MethodHook mh;
 
     @Override
@@ -46,12 +42,13 @@ public class Module implements IXposedHookZygoteInit, IXposedHookInitPackageReso
             @Override
             protected void afterHookedMethod(MethodHookParam param) throws Throwable {
                 Application currentApp = (Application) param.thisObject;
+                hookFactory = new HookFactory(currentApp);
                 XposedBridge.log(TAG + "/Hooked package: " + lpparam.packageName + ", application: " + currentApp);
 
                 currentApp.registerReceiver(new BroadcastReceiver() {
                     @Override
                     public void onReceive(Context context, Intent intent) {
-                        hookMethod(context, intent);
+                        hookMethod(intent);
                     }
                 }, new IntentFilter(RemoteHook.ACTION_HOOK));
 
@@ -65,10 +62,10 @@ public class Module implements IXposedHookZygoteInit, IXposedHookInitPackageReso
         });
     }
 
-    private void hookMethod(Context context, Intent intent) {
+    private void hookMethod(Intent intent) {
         try {
-            XC_MethodHook hookImpl = makeHookImpl(context, intent);
-            Method m = getMethod(intent);
+            XC_MethodHook hookImpl = hookFactory.makeHookImpl(intent);
+            Method m = hookFactory.makeMethod(intent);
             XposedBridge.log(TAG + "/Hooking method: " + m.className() + "#" + m.methodName());
             mh.hook(m, hookImpl);
         } catch (Exception e) {
@@ -78,40 +75,11 @@ public class Module implements IXposedHookZygoteInit, IXposedHookInitPackageReso
 
     private void unhookMethod(Intent intent) {
         try {
-            Method m = getMethod(intent);
+            Method m = hookFactory.makeMethod(intent);
             XposedBridge.log(TAG + "/Unhooking method: " + m.className() + "#" + m.methodName() + m.paramTypes().toString());
             mh.unhook(m);
         } catch (IllegalArgumentException e) {
             XposedBridge.log(e);
         }
-    }
-
-    private XC_MethodHook makeHookImpl(Context context, Intent intent) throws IOException, ClassNotFoundException, IllegalAccessException, InstantiationException, PackageManager.NameNotFoundException {
-        if (!extrasContainDexFile(intent)) {
-            throw new IllegalArgumentException("Intent extras do not contain a reference to a dex file");
-        }
-
-        String sourcePackageName = intent.getStringExtra(RemoteHook.SOURCE_PACKAGE);
-        int classesDexId = intent.getIntExtra(RemoteHook.HOOK_IMPL_RES_ID, 0);
-
-        Resources sourceResources = context.getPackageManager().getResourcesForApplication(sourcePackageName);
-        InputStream dexFile = sourceResources.openRawResource(classesDexId);
-
-        String hookImplName = intent.getStringExtra(RemoteHook.HOOK_IMPL_CLASS_NAME);
-        InputStreamDexClassLoader classLoader = new InputStreamDexClassLoader(
-                dexFile,
-                hookImplName + ".classes.dex",
-                context,
-                ClassLoader.getSystemClassLoader());
-        return classLoader.<XC_MethodHook>loadClass(hookImplName).newInstance();
-    }
-
-    private boolean extrasContainDexFile(Intent intent) {
-        return intent.hasExtra(RemoteHook.SOURCE_PACKAGE)
-                && intent.hasExtra(RemoteHook.HOOK_IMPL_RES_ID);
-    }
-
-    private Method getMethod(Intent intent) {
-        return intent.getParcelableExtra(RemoteHook.METHOD);
     }
 }

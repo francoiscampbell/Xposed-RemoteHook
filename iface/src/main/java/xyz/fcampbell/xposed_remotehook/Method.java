@@ -5,6 +5,7 @@ import android.support.annotation.NonNull;
 
 import com.google.auto.value.AutoValue;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -12,11 +13,13 @@ import java.util.List;
  */
 @AutoValue
 public abstract class Method implements Parcelable, Comparable<Method> {
-    public static Method create(String packageName, String className, String methodName, List<String> paramTypes) {
-        return new AutoValue_Method(packageName, className, methodName, paramTypes);
+    public static Method create(String className, String methodName, List<String> paramTypes) {
+        return new AutoValue_Method(className, methodName, paramTypes);
     }
 
-    public abstract String packageName();
+    public static Method create(String className, String methodName, String[] paramTypes) {
+        return new AutoValue_Method(className, methodName, Arrays.asList(paramTypes));
+    }
 
     public abstract String className();
 

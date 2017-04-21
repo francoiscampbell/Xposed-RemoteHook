@@ -61,12 +61,16 @@ public class MainActivity extends AppCompatActivity {
             if (paramList.get(0).isEmpty()) paramList = paramList.subList(1, paramList.size());
 
             Method m = Method.create(
-                    hookedPackage.getText().toString(),
                     hookedClassName.getText().toString(),
                     hookedMethodName.getText().toString(),
                     paramList);
             Log.d(TAG, m.toString());
-            RemoteHook.hookMethod(MainActivity.this, m, hookImplClass.getText().toString(), R.raw.classes);
+            RemoteHook.hookMethod(
+                    MainActivity.this,
+                    hookedPackage.getText().toString(),
+                    m,
+                    hookImplClass.getText().toString(),
+                    R.raw.classes);
             hookedMethods.add(m);
             hookedMethodsAdapter.notifyDataSetChanged();
         } catch (IOException e) {
@@ -77,7 +81,10 @@ public class MainActivity extends AppCompatActivity {
     @OnClick(R.id.unhook)
     void unhook() {
         Method m = (Method) hookedMethodsSpinner.getSelectedItem();
-        RemoteHook.unhookMethod(MainActivity.this, m);
+        RemoteHook.unhookMethod(
+                MainActivity.this,
+                hookedPackage.getText().toString(),
+                m);
         hookedMethods.remove(m);
         hookedMethodsAdapter.notifyDataSetChanged();
     }

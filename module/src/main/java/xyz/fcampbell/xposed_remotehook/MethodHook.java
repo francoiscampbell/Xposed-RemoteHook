@@ -57,5 +57,4 @@ class MethodHook {
         newArray[array.length] = val;
         return newArray;
     }
-
 }
